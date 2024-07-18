@@ -1,0 +1,24 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+table, tr, td, th {
+    border: 1px solid black;
+    box-sizing: border-box;
+    border-collapse: collapse;
+}
+
+td, th {
+    min-width: 5vw;
+    min-height: 1vh;
+}
+
+th {
+    background-color: lightgray;
+}
+
+.cell-selected {
+    border-color: blue;
+    border-width: 3px;
+}
