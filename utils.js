@@ -1,5 +1,5 @@
 async function loadFakeCsvData() {
-    const resp = await fetch(`http://127.0.0.1:5500/mock_data.csv`)
+    const resp = await fetch(`/mock_data.csv`)
     const text = await resp.text()
     const data = []
     const lines = text.split("\n")
