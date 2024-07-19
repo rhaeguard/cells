@@ -57,7 +57,15 @@ document.addEventListener("keydown", (event) => {
             if (event.key === "Enter") {
                 for (let targetId of selectedCells) {
                     document.getElementById(targetId).setAttribute("contenteditable", false);
+                    let text = document.getElementById(targetId).innerText.trim()
+                    if (text.startsWith("=")) {
+                        text = text.slice(1)
+                        const res = eval(parse(lex(text)), DATA_TABLE);
+                        const [row, col] = getCellPositionFromId(targetId)
+                        DATA_TABLE[col][row].data = res;
+                    }
                 }
+                redraw()
                 event.preventDefault()
             }
         }
