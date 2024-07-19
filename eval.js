@@ -7,8 +7,8 @@ const binaryOperation = (lambda) => {
 }
 
 const getCellPositionFromCoord = (coord) => {
-    const column = [...coord].filter(a => !parseInt(a)).join("")
-    const row = parseInt([...coord].filter(a => parseInt(a)).join(""))
+    const column = [...coord].filter(isAlpha).join("")
+    const row = parseInt([...coord].filter(isDigit).join(""))
     return [row, column]
 }
 
