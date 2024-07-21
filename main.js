@@ -1,11 +1,15 @@
 let TOTAL_ROW_COUNT = 100;
 let TOTAL_COL_COUNT = 26;
 
-const createCell = (data) => {
+const createCell = (ignored) => {
     return {
-        data: undefined,
-        str: function() {
-            return this.data ? `${data}` : ""
+        data: undefined, // this is the raw data, can be a number, text or a formula
+        value: function() {
+            if (this.data && this.data.startsWith("=")) {
+                const text = this.data.slice(1)
+                return eval(parse(lex(text)), DATA_TABLE); // TODO: handle errors
+            }
+            return this.data
         },
         style: {
             backgroundColor: undefined,
@@ -58,12 +62,8 @@ document.addEventListener("keydown", (event) => {
                 for (let targetId of selectedCells) {
                     document.getElementById(targetId).setAttribute("contenteditable", false);
                     let text = document.getElementById(targetId).innerText.trim()
-                    if (text.startsWith("=")) {
-                        text = text.slice(1)
-                        const res = eval(parse(lex(text)), DATA_TABLE);
-                        const [row, col] = getCellPositionFromId(targetId)
-                        DATA_TABLE[col][row].data = res;
-                    }
+                    const [row, col] = getCellPositionFromId(targetId)
+                    DATA_TABLE[col][row].data = text;
                 }
                 redraw()
                 event.preventDefault()
@@ -80,6 +80,9 @@ function registerEventListenersForCell(cell) {
 
     
     cell.addEventListener("dblclick", (event) => {
+        const [row, col] = getCellPositionFromId(event.target.id)
+        const data = DATA_TABLE[col][row].data
+        event.target.innerText = data ? data : ""
         event.target.setAttribute("contenteditable", true);
     });
 
@@ -142,7 +145,8 @@ function redraw() {
                     cell.style.backgroundColor = "lightblue";
                 }
                 
-                cell.innerHTML = datum.data ? datum.data : "&nbsp"
+                const v = datum.value()
+                cell.innerHTML = v ? v : ""
             }
         }
         ROOT_TABLE.appendChild(tr);

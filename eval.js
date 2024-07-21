@@ -42,7 +42,9 @@ const BUILT_IN_FUNCTIONS_MAP = {
         }
         return result / count
     },
-    "mode": function(args, context) {},
+    "mode": function(args, context) {
+
+    },
     "count": function(args, context) {
         let count = 0
         // assumption is that the first arg is a multi-array range
@@ -51,7 +53,16 @@ const BUILT_IN_FUNCTIONS_MAP = {
         }
         return count
     },
-    "if": function(args, context) {},
+    "if": function(args, context) {
+        // if <condition> <true> <false>
+        const condition = args[0]
+        const success = args[1]
+        const fail = args[2]
+        if (eval(condition, context) == true) {
+            return eval(success, context)
+        }
+        return eval(fail, context)
+    },
     "min": function(args, context) {
         let globalMin = Infinity
         // assumption is that the first arg is a multi-array range
@@ -73,8 +84,16 @@ const BUILT_IN_FUNCTIONS_MAP = {
     "__range__": function(args, context) {
         const [sr, sc] = getCellPositionFromCoord(args[0].value)
         const [er, ec] = getCellPositionFromCoord(args[1].value)
-        // assume sc == ec
-        return [context[sc].slice(sr, er+1).map(cell => cell.data)]
+        const result = []
+        let currentCol = sc
+        do {
+            result.push(context[currentCol].slice(sr, er+1).map(cell => cell.data))
+            if (currentCol === ec) {
+                break
+            }
+            currentCol = getColumnNumberFromName(currentCol)
+        } while(true);
+        return result
     },
 }
 
@@ -98,8 +117,8 @@ function eval(expression, context) {
     } else if (type === DataType.Reference) {
         // resolve it using context
         const [row, column] = getCellPositionFromCoord(value)
-        return context[column][row].data;
+        return context[column][row].value();
     } else {
-        console.error(`unrecognized expression type: ${type} (${value})`)
+        console.error(`unrecognized expression type: ${type} (${value}) (${expression})`)
     }
 }

@@ -72,19 +72,24 @@ const generateNextColumnName = (colNum) => {
     return response;
 }
 
-const generateNextColumnNameRecursive = (colNum) => {
-    if (colNum === 0) {
-        return ""
+const getColumnNumberFromName = (colName) => {
+    let letters = [...colName]
+
+    let offset = 1
+
+    for (let i=letters.length-1; i >= 0; i--) {
+        let letter = letters[i]
+        let pos = (letter.charCodeAt(0) - 65) + offset
+        let newLetter = String.fromCharCode((pos % 26) + 65)
+        letters[i] = newLetter
+        offset = Math.floor(pos / 26)
     }
 
-    colNum -= 1
+    if (offset != 0) {
+        letters = ['A', ...letters]
+    }
 
-    const base = Math.floor(colNum / 26);
-    const remainder = colNum % 26;
-    const suffix = String.fromCharCode(65 + remainder)
-    const prefix = generateNextColumnName(base);
-
-    return `${prefix}${suffix}`
+    return letters.join("")
 }
 
 const getCellPositionFromId = (id) => {
