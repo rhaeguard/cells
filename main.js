@@ -122,14 +122,14 @@ document.addEventListener("keydown", (event) => {
                     DATA_TABLE[colId][rowNum].style.isBold = !DATA_TABLE[colId][rowNum].style.isBold;
                 }
                 event.preventDefault()
-                redraw()
+                document.dispatchEvent(DRAW_EVENT)
             } else if (event.key === 'i') {
                 for (let targetId of selectedCells) {
                     const [rowNum, colId] = getCellPositionFromId(targetId)
                     DATA_TABLE[colId][rowNum].style.isItalic = !DATA_TABLE[colId][rowNum].style.isItalic;
                 }
                 event.preventDefault()
-                redraw()
+                document.dispatchEvent(DRAW_EVENT)
             }
         } else {
             if (event.key === "Enter") {
@@ -140,8 +140,8 @@ document.addEventListener("keydown", (event) => {
                     DATA_TABLE[col][row].set(text);
                     DATA_TABLE[col][row].computeAndPropagate()
                 }
-                redraw()
                 event.preventDefault()
+                document.dispatchEvent(DRAW_EVENT)
             }
         }
     }
@@ -177,7 +177,7 @@ function registerEventListenersForCell(cell) {
                 }
                 selectedCells = [id];
             }
-            redraw();
+            document.dispatchEvent(DRAW_EVENT)
         }
     })
 
@@ -223,5 +223,12 @@ function redraw() {
         ROOT_TABLE.appendChild(tr);
     }
 }
+
+document.addEventListener("draw", async function (event) {
+    await new Promise((resolve) => {
+        redraw()
+        resolve()
+    })
+})
 
 redraw()

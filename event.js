@@ -1,0 +1,1 @@
+const DRAW_EVENT = new Event("draw")
