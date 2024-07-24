@@ -170,7 +170,7 @@ function lex(input) {
     return tokens
 }
 
-function parseExpression(data) {
+function parseExpression(data, references) {
     if (!data.cur() || (data.cur().tokenType !== TokenType.LParen)) {
         return []
     }
@@ -189,7 +189,7 @@ function parseExpression(data) {
         const tokenType = token.tokenType;
 
         if (tokenType === TokenType.LParen) {
-            const subexpr = parseExpression(data)
+            const subexpr = parseExpression(data, references)
             expressions.push(subexpr)
         } else {
             if (tokenType === TokenType.LiteralNumber) {
@@ -208,6 +208,7 @@ function parseExpression(data) {
                 )
             } else if (tokenType === TokenType.Ident) {
                 if (token.value.includes(":")) {
+                    references.push(token.value)
                     // this is a range
                     const [s, e] = token.value.split(":")
                     expressions.push(
@@ -250,6 +251,7 @@ function parseExpression(data) {
                             DataType.Reference
                         )
                     )
+                    references.push(token.value)
                 }
             }
         }
@@ -288,10 +290,11 @@ function parse(tokens) {
     }
 
     try {
-        return parseExpression(data)
+        const references = []
+        return [parseExpression(data, references), references]
     } catch (error) {
         console.error(`Parsing error`, error)
-        return []        
+        return [[], []]
     }
 }
 

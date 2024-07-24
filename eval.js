@@ -120,5 +120,6 @@ function eval(expression, context) {
         return context[column][row].value();
     } else {
         console.error(`unrecognized expression type: ${type} (${value}) (${expression})`)
+        return null
     }
 }

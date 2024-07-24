@@ -101,7 +101,7 @@ const getCellPositionFromId = (id) => {
     ]
 }
 
-function debounce(func, timeout = 200) {
+function debounce(func, timeout = 100) {
     let timer;
     return (...args) => {
         clearTimeout(timer);

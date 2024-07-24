@@ -1,16 +1,88 @@
 let TOTAL_ROW_COUNT = 100;
 let TOTAL_COL_COUNT = 26;
 
-const createCell = (ignored) => {
+const createCell = (id) => {
     return {
+        id: id,
         data: undefined, // this is the raw data, can be a number, text or a formula
+        computedValue: undefined,
+        set: function(newData) {
+            this.data = newData
+            console.log(`[${id}] was set to ${newData}`)
+
+            if (newData && newData.startsWith("=")) {
+                // we set a formula
+                const text = newData.slice(1)
+                const [_, references] = parse(lex(text))
+
+                const resolvedDependendies = new Set()
+
+                for (let ref of references) {
+                    const [start, end] = ref.includes(":") ? ref.split(":") : [ref, ref]
+
+                    const [sr, sc] = getCellPositionFromCoord(start)
+                    const [er, ec] = getCellPositionFromCoord(end)
+                    
+                    let currentCol = sc
+
+                    do {
+                        for (let r = sr; r <= er; r++) {
+                            resolvedDependendies.add(`${currentCol}${r}`)
+                        }
+
+                        if (currentCol === ec) {
+                            break
+                        }
+                        currentCol = getColumnNumberFromName(currentCol)
+                    } while(true);
+                }
+
+                for (const cell of this.dependencies) {
+                    const [row, col] = getCellPositionFromCoord(cell)
+                    const ix = DATA_TABLE[col][row].subscribers.indexOf(id)
+                    if (ix > -1) {
+                        DATA_TABLE[col][row].subscribers.splice(ix, 1)
+                    }
+                }
+
+                this.dependencies = [...resolvedDependendies]
+
+                for (const cell of this.dependencies) {
+                    const [row, col] = getCellPositionFromCoord(cell)
+                    DATA_TABLE[col][row].subscribers.push(id)
+                }
+            } else {
+                // we set a scalar
+            }
+        },
         value: function() {
+            return this.computedValue ?? this.data 
+        },
+        computeAndPropagate: function() {
+            let response = null
             if (this.data && this.data.startsWith("=")) {
                 const text = this.data.slice(1)
-                return eval(parse(lex(text)), DATA_TABLE); // TODO: handle errors
+                const [parsedExpression, _] = parse(lex(text))
+                response = eval(parsedExpression, DATA_TABLE); // TODO: handle errors
+            } else {
+                response = this.data
             }
-            return this.data
+
+            // console.log(`[${this.id}] value ${this.computedValue} => ${response}`)
+
+            this.computedValue = response;
+
+            for (let subscriber of this.subscribers) {
+                const [row, col] = getCellPositionFromCoord(subscriber)
+                DATA_TABLE[col][row].computeAndPropagate()
+            }
         },
+        subscribers: [
+            // cells that depend on this cell
+        ],
+        dependencies: [
+            // cells that this cell depends on
+        ],
         style: {
             backgroundColor: undefined,
             textColor: undefined,
@@ -29,7 +101,9 @@ const createDataTable = (rowCount, colCount) => {
         const key = generateNextColumnName(c)
         tableObj[key] = new Array(rowCount + 1) // to make it 1-based index
             .fill(null)   
-            .map(createCell)
+            .map((_, row) => {
+                return createCell(`${key}${row}`)
+            })
     }
     
     return tableObj;
@@ -63,7 +137,8 @@ document.addEventListener("keydown", (event) => {
                     document.getElementById(targetId).setAttribute("contenteditable", false);
                     let text = document.getElementById(targetId).innerText.trim()
                     const [row, col] = getCellPositionFromId(targetId)
-                    DATA_TABLE[col][row].data = text;
+                    DATA_TABLE[col][row].set(text);
+                    DATA_TABLE[col][row].computeAndPropagate()
                 }
                 redraw()
                 event.preventDefault()
@@ -73,12 +148,6 @@ document.addEventListener("keydown", (event) => {
 })
 
 function registerEventListenersForCell(cell) {
-    const handleCellContentChange = debounce((id, content) => {
-        const [row, col] = getCellPositionFromId(id)
-        DATA_TABLE[col][row].data = content;
-    });
-
-    
     cell.addEventListener("dblclick", (event) => {
         const [row, col] = getCellPositionFromId(event.target.id)
         const data = DATA_TABLE[col][row].data
@@ -89,7 +158,8 @@ function registerEventListenersForCell(cell) {
     cell.addEventListener("input", (event) => {
         const id = event.target.id;
         const content = event.target.innerText;
-        handleCellContentChange(id, content)
+        const [row, col] = getCellPositionFromId(id)
+        DATA_TABLE[col][row].data = content;
     })
 
     cell.addEventListener("click", (event) => {
@@ -103,6 +173,7 @@ function registerEventListenersForCell(cell) {
                 for (let otherSelected of selectedCells) {
                     const [r, c] = getCellPositionFromId(otherSelected)
                     DATA_TABLE[c][r].style.isSelected = false;
+                    DATA_TABLE[c][r].computeAndPropagate()
                 }
                 selectedCells = [id];
             }
@@ -154,19 +225,3 @@ function redraw() {
 }
 
 redraw()
-
-const data = loadFakeCsvData()
-
-data.then(multiarray => {
-    const colCount = multiarray[0].length;
-    for (let c=0; c < colCount; c++) {
-        const colName = generateNextColumnName(c+1);
-        const columnData = DATA_TABLE[colName]
-
-        for (let r=0; r < multiarray.length; r++) {
-            columnData[r + 1].data = multiarray[r][c]
-        }
-    }
-
-    redraw()
-})
