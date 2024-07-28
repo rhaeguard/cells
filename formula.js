@@ -12,6 +12,10 @@ const BinaryOperators = [
     ":",
 ]
 
+const SpecialChars = [
+    ".", // this is decimal separator
+]
+
 const BUILT_IN_FUNCTIONS = [
     "+",
     "-",
@@ -40,6 +44,7 @@ const TokenType = {
     Ident: "Ident",
     LParen: "LParen",
     RParen: "RParen",
+    DecimalSeparator: "DecimalSeparator",
 }
 
 const DataType = {
@@ -96,7 +101,7 @@ function lexNumber(data) {
 
     return createToken(
         TokenType.LiteralNumber,
-        parseInt(numberString)
+        numberString
     )
 }
 
@@ -141,14 +146,15 @@ function lex(input) {
                 ch
             ))
         } else if (" " === ch || "\n" === ch || "\t" === ch) {
-            // TODO: we have bundle more together
-            // tokens.push(createToken(
-            //     TokenType.WS,
-            //     ch
-            // ))
-        } else if (parseInt(ch)) {
+            // spaces are irrelevant, so ignore them
+        } else if (isDigit(ch)) {
             tokens.push(lexNumber(data))
-        } else {
+        } else if (SpecialChars.includes(ch)) {
+            tokens.push(createToken(
+                TokenType.DecimalSeparator,
+                ch
+            ))
+        } else if (isAlpha(ch) || BinaryOperators.includes(ch)) {
             let identString = ""
             // TODO: improve this, we might not need these checks at all
             while (isAlpha(data.cur()) || isDigit(data.cur()) || BinaryOperators.includes(data.cur())) {
@@ -162,10 +168,45 @@ function lex(input) {
                 TokenType.Ident,
                 identString
             ))
+        } else {
+            // TODO: maybe return error?
+            console.log(`unrecognized char: '${ch}' at position ${data.pos+1} in expression: ${input}`)
         }
     }
 
     return tokens
+}
+
+const createExpression = (value, type) => {
+    return {
+        value: value,
+        type: type
+    }
+}
+
+function parseNumber(data) {
+    // grammar: <number>(.<number>?)?
+    // number := [0-9]+
+    const token = data.cur()
+    let expression = createExpression(
+        parseInt(token.value),
+        DataType.Number
+    )
+
+    let nextToken = data.adv()
+    if (nextToken.tokenType == TokenType.DecimalSeparator) {
+        nextToken = data.adv()
+        if (nextToken.tokenType == TokenType.LiteralNumber) {
+            expression = createExpression(
+                parseFloat(`${token.value}.${nextToken.value}`),
+                DataType.Number
+            )
+        }
+    } else {
+        data.back() // backtrack in case it is not a decimal separator
+    }
+
+    return expression
 }
 
 function parseExpression(data, references) {
@@ -174,13 +215,6 @@ function parseExpression(data, references) {
     }
 
     const expressions = []
-
-    const createExpression = (value, type) => {
-        return {
-            value: value,
-            type: type
-        }
-    }
 
     while (data.adv().tokenType != TokenType.RParen) {
         const token = data.cur()
@@ -191,12 +225,7 @@ function parseExpression(data, references) {
             expressions.push(subexpr)
         } else {
             if (tokenType === TokenType.LiteralNumber) {
-                expressions.push(
-                    createExpression(
-                        parseInt(token.value),
-                        DataType.Number
-                    )
-                )
+                expressions.push(parseNumber(data))
             } else if (tokenType === TokenType.LiteralString) {
                 expressions.push(
                     createExpression(
@@ -284,7 +313,7 @@ function parse(tokens) {
                 return null
             }
             return this.input[this.pos];
-        }
+        },
     }
 
     try {
