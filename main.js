@@ -6,9 +6,10 @@ const createCell = (id) => {
         id: id,
         data: undefined, // this is the raw data, can be a number, text or a formula
         computedValue: undefined,
+        error: undefined,
         set: function(newData) {
             this.data = newData
-            console.log(`[${id}] was set to ${newData}`)
+            // console.log(`[${id}] was set to ${newData}`)
 
             if (newData && newData.startsWith("=")) {
                 // we set a formula
@@ -56,6 +57,9 @@ const createCell = (id) => {
             }
         },
         value: function() {
+            if (this.error) {
+                return new Error(this.error.message ?? "#ERROR")
+            }
             return this.computedValue ?? this.data 
         },
         computeAndPropagate: function() {
@@ -63,7 +67,12 @@ const createCell = (id) => {
             if (this.data && this.data.startsWith("=")) {
                 const text = this.data.slice(1)
                 const [parsedExpression, _] = parse(lex(text))
-                response = eval(parsedExpression, DATA_TABLE); // TODO: handle errors
+                const [evalResponse, error] = eval(parsedExpression, DATA_TABLE); // TODO: handle errors
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                response = evalResponse
             } else {
                 response = this.data
             }
@@ -71,6 +80,7 @@ const createCell = (id) => {
             // console.log(`[${this.id}] value ${this.computedValue} => ${response}`)
 
             this.computedValue = response;
+            this.error = null;
 
             for (let subscriber of this.subscribers) {
                 const [row, col] = getCellPositionFromCoord(subscriber)
@@ -135,9 +145,10 @@ document.addEventListener("keydown", (event) => {
             if (event.key === "Enter") {
                 for (let targetId of selectedCells) {
                     document.getElementById(targetId).setAttribute("contenteditable", false);
-                    let text = document.getElementById(targetId).innerText.trim()
+                    let content = document.getElementById(targetId).innerText.trim()
+                    content = content === "" ? undefined : content;
                     const [row, col] = getCellPositionFromId(targetId)
-                    DATA_TABLE[col][row].set(text);
+                    DATA_TABLE[col][row].set(content);
                     DATA_TABLE[col][row].computeAndPropagate()
                 }
                 event.preventDefault()
@@ -159,7 +170,7 @@ function registerEventListenersForCell(cell) {
         const id = event.target.id;
         const content = event.target.innerText;
         const [row, col] = getCellPositionFromId(id)
-        DATA_TABLE[col][row].data = content;
+        DATA_TABLE[col][row].data = content === "" ? undefined : content;
     })
 
     cell.addEventListener("click", (event) => {
@@ -217,7 +228,11 @@ function redraw() {
                 }
                 
                 const v = datum.value()
-                cell.innerHTML = v ? v : ""
+                if (v instanceof Error) {
+                    cell.innerHTML = v.message;
+                } else {
+                    cell.innerHTML = v ? v : ""
+                }
             }
         }
         ROOT_TABLE.appendChild(tr);

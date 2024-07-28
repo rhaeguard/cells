@@ -133,8 +133,7 @@ function lex(input) {
         const ch = data.cur()
 
         if (`"` === ch) {
-            const t = lexString(data)
-            tokens.push(t)
+            tokens.push(lexString(data))
         } else if ("(" === ch || ")" === ch) {
             const tokenType = ch === "(" ? TokenType.LParen : TokenType.RParen
             tokens.push(createToken(
@@ -148,8 +147,7 @@ function lex(input) {
             //     ch
             // ))
         } else if (parseInt(ch)) {
-            const t = lexNumber(data)
-            tokens.push(t)
+            tokens.push(lexNumber(data))
         } else {
             let identString = ""
             // TODO: improve this, we might not need these checks at all
