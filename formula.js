@@ -251,6 +251,11 @@ function parseExpression(data, references) {
                     references.push(token.value)
                     // this is a range
                     const [s, e] = token.value.split(":")
+
+                    if (!hasReferenceFormat(s) || !hasReferenceFormat(e)) {
+                        throw new Error(`${token.value} is an invalid cell range reference`)
+                    }
+
                     expressions.push(
                         createExpression(
                             [
@@ -285,13 +290,17 @@ function parseExpression(data, references) {
                         )
                     )
                 } else {
-                    expressions.push(
-                        createExpression(
-                            token.value,
-                            DataType.Reference
+                    if (hasReferenceFormat(token.value)) {
+                        expressions.push(
+                            createExpression(
+                                token.value,
+                                DataType.Reference
+                            )
                         )
-                    )
-                    references.push(token.value)
+                        references.push(token.value)
+                    } else {
+                        throw new Error(`${token.value} is an invalid cell reference`)
+                    }
                 }
             }
         }

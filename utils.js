@@ -112,3 +112,9 @@ function debounce(func, timeout = 100) {
 function hasValue(o) {
     return o != null && o != undefined
 }
+
+const PROPER_REFERENCE_FORMAT = /[A-Z]+[1-9][0-9]*/
+
+function hasReferenceFormat(maybeReference) {
+    return PROPER_REFERENCE_FORMAT.test(maybeReference)
+}
