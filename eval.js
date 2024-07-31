@@ -120,7 +120,7 @@ const BUILT_IN_FUNCTIONS_MAP = {
         const result = []
         let currentCol = sc
         do {
-            result.push(context[currentCol].slice(sr, er+1).map(cell => cell.data))
+            result.push(context[currentCol].slice(sr, er+1).map(cell => cell.computedValue))
             if (currentCol === ec) {
                 break
             }
