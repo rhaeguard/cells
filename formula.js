@@ -155,6 +155,17 @@ function lex(input) {
                 ch
             ))
         } else if (isAlpha(ch) || BinaryOperators.includes(ch)) {
+            if (["+", "-"].includes(ch)) {
+                if (isDigit(data.adv())) {
+                    const numberToken = lexNumber(data)
+                    numberToken.value = `${ch}${numberToken.value}`
+                    tokens.push(numberToken)
+                    continue
+                } else {
+                    data.back()
+                }
+            }
+
             let identString = ""
             // TODO: improve this, we might not need these checks at all
             while (isAlpha(data.cur()) || isDigit(data.cur()) || BinaryOperators.includes(data.cur())) {
@@ -197,6 +208,8 @@ function parseNumber(data) {
     if (nextToken.tokenType == TokenType.DecimalSeparator) {
         nextToken = data.adv()
         if (nextToken.tokenType == TokenType.LiteralNumber) {
+            // TODO: this number could technically be negative
+            // e.g., -123.-372
             expression = createExpression(
                 parseFloat(`${token.value}.${nextToken.value}`),
                 DataType.Number

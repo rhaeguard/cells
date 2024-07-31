@@ -3,7 +3,7 @@ const binaryOperation = (lambda) => {
         const [a, errorA] = eval(args[0], context) // should be a number
         const [b, errorB] = eval(args[1], context) // should be a number
 
-        if (a && b) {
+        if (hasValue(a) && hasValue(b)) {
             const x = parseFloat(a)
             const y = parseFloat(b)
             return [lambda(x, y), null]

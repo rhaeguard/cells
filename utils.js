@@ -108,3 +108,7 @@ function debounce(func, timeout = 100) {
         timer = setTimeout(() => { func.apply(this, args); }, timeout);
     };
 }
+
+function hasValue(o) {
+    return o != null && o != undefined
+}
