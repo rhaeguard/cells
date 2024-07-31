@@ -2,7 +2,7 @@
 
 a spreadsheet app with lisp-like formulas
 
-https://github.com/user-attachments/assets/91fb52ce-916d-4057-9873-f488c9d88f87
+[https://github.com/user-attachments/assets/91fb52ce-916d-4057-9873-f488c9d88f87](https://github.com/user-attachments/assets/4f7ea982-1d44-4bce-9497-b48c75836adc)
 
 ## todo
 
