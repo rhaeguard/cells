@@ -36,10 +36,9 @@ a spreadsheet app with lisp-like formulas
     - [x] select cells individually using ctrl
     - [ ] select cells range with shift
 
-### Advanced but Necessary Features
+### Advanced Features
 
-- [ ] construct an evaluation graph (_currently using observables to propagate value update_)
-- [ ] circular dependency/cycle detection
+- [x] circular dependency/cycle detection
 - [ ] helpful error messages
 - [ ] charts
 - [ ] multiple sheets

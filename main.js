@@ -7,9 +7,10 @@ const createCell = (id) => {
         data: undefined, // this is the raw data, can be a number, text or a formula
         computedValue: undefined,
         error: undefined,
-        set: function(newData) {
+        containsCycle: false,
+        set: function(newData=null) {
+            newData = newData ?? this.data
             this.data = newData
-            // console.log(`[${id}] was set to ${newData}`)
 
             if (newData && newData.startsWith("=")) {
                 // we set a formula
@@ -38,6 +39,27 @@ const createCell = (id) => {
                     } while(true);
                 }
 
+                const previousDependencies = [...this.dependencies]
+                this.dependencies = [...resolvedDependendies]
+
+                this.containsCycle = containsCycle(constructGraph(DATA_TABLE))
+
+                // remove the previous dependencies from subscribers list
+                for (const cell of previousDependencies) {
+                    const [row, col] = getCellPositionFromCoord(cell)
+                    const ix = DATA_TABLE[col][row].subscribers.indexOf(id)
+                    if (ix > -1) {
+                        DATA_TABLE[col][row].subscribers.splice(ix, 1)
+                    }
+                }
+                
+                // add the new dependencies to subscribers list
+                for (const cell of this.dependencies) {
+                    const [row, col] = getCellPositionFromCoord(cell)
+                    DATA_TABLE[col][row].subscribers.push(id)
+                }
+            } else {
+                // we set a scalar
                 for (const cell of this.dependencies) {
                     const [row, col] = getCellPositionFromCoord(cell)
                     const ix = DATA_TABLE[col][row].subscribers.indexOf(id)
@@ -45,15 +67,8 @@ const createCell = (id) => {
                         DATA_TABLE[col][row].subscribers.splice(ix, 1)
                     }
                 }
-
-                this.dependencies = [...resolvedDependendies]
-
-                for (const cell of this.dependencies) {
-                    const [row, col] = getCellPositionFromCoord(cell)
-                    DATA_TABLE[col][row].subscribers.push(id)
-                }
-            } else {
-                // we set a scalar
+                this.dependencies = []
+                this.containsCycle = false;
             }
         },
         value: function() {
@@ -63,6 +78,12 @@ const createCell = (id) => {
             return this.computedValue ?? this.data 
         },
         computeAndPropagate: function() {
+            if (this.containsCycle) {
+                this.error = new Error("cycle detected")
+                this.computedValue = undefined;
+                return;
+            }
+
             let response = null
             if (this.data && this.data.startsWith("=")) {
                 const text = this.data.slice(1)
@@ -84,6 +105,7 @@ const createCell = (id) => {
 
             for (let subscriber of this.subscribers) {
                 const [row, col] = getCellPositionFromCoord(subscriber)
+                DATA_TABLE[col][row].set()
                 DATA_TABLE[col][row].computeAndPropagate()
             }
         },
@@ -184,6 +206,7 @@ function registerEventListenersForCell(cell) {
                 for (let otherSelected of selectedCells) {
                     const [r, c] = getCellPositionFromId(otherSelected)
                     DATA_TABLE[c][r].style.isSelected = false;
+                    DATA_TABLE[c][r].set()
                     DATA_TABLE[c][r].computeAndPropagate()
                 }
                 selectedCells = [id];
