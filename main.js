@@ -8,6 +8,7 @@ const createCell = (id) => {
         computedValue: undefined,
         error: undefined,
         containsCycle: false,
+        node: null,
         set: function(newData=null) {
             newData = newData ?? this.data
             this.data = newData
@@ -77,10 +78,29 @@ const createCell = (id) => {
             }
             return this.computedValue ?? this.data 
         },
+        draw: function() {
+            const v = this.value()
+            if (v instanceof Error) {
+                this.node.innerHTML = v.message;
+            } else {
+                this.node.innerHTML = v ? v : ""
+            }
+
+            this.node.style.backgroundColor = this.style.backgroundColor ?? "inherit";
+            this.node.style.textColor = this.style.textColor ?? "inherit";
+            this.node.style.textSize = this.style.textSize;
+            this.node.style.fontWeight = this.style.isBold ? "bold" : "normal";
+            this.node.style.fontStyle = this.style.isItalic ? "italic" : "normal"
+
+            if (this.style.isSelected) {
+                this.node.style.backgroundColor = "lightblue";
+            }
+        },
         computeAndPropagate: function() {
             if (this.containsCycle) {
                 this.error = new Error("cycle detected")
                 this.computedValue = undefined;
+                this.draw()
                 return;
             }
 
@@ -91,6 +111,7 @@ const createCell = (id) => {
                 const [evalResponse, error] = eval(parsedExpression, DATA_TABLE); // TODO: handle errors
                 if (error) {
                     this.error = error;
+                    this.draw()
                     return;
                 }
                 response = evalResponse
@@ -102,6 +123,7 @@ const createCell = (id) => {
 
             this.computedValue = response;
             this.error = null;
+            this.draw()
 
             for (let subscriber of this.subscribers) {
                 const [row, col] = getCellPositionFromCoord(subscriber)
@@ -204,13 +226,13 @@ function registerEventListenersForCell(cell) {
                 selectedCells.push(id);
             } else {
                 for (let otherSelected of selectedCells) {
-                    const [r, c] = getCellPositionFromId(otherSelected)
-                    DATA_TABLE[c][r].style.isSelected = false;
-                    DATA_TABLE[c][r].set()
-                    DATA_TABLE[c][r].computeAndPropagate()
+                    const [rr, cc] = getCellPositionFromId(otherSelected)
+                    DATA_TABLE[cc][rr].style.isSelected = false;
+                    DATA_TABLE[cc][rr].draw()
                 }
                 selectedCells = [id];
             }
+            DATA_TABLE[c][r].draw()
             document.dispatchEvent(DRAW_EVENT)
         }
     })
@@ -256,6 +278,8 @@ function redraw() {
                 } else {
                     cell.innerHTML = v ? v : ""
                 }
+
+                DATA_TABLE[generateNextColumnName(c)][r].node = cell;
             }
         }
         ROOT_TABLE.appendChild(tr);
@@ -263,10 +287,24 @@ function redraw() {
 }
 
 document.addEventListener("draw", async function (event) {
-    await new Promise((resolve) => {
-        redraw()
-        resolve()
-    })
+    // await new Promise((resolve) => {
+    //     redraw()
+    //     resolve()
+    // })
 })
 
 redraw()
+
+// const multiarray = loadFakeCsvData()
+
+// const colCount = multiarray[0].length;
+// for (let c=0; c < colCount; c++) {
+//     const colName = generateNextColumnName(c+1);
+//     const columnData = DATA_TABLE[colName]
+
+//     for (let r=0; r < multiarray.length; r++) {
+//         columnData[r + 1].data = multiarray[r][c]
+//     }
+// }
+
+// redraw()

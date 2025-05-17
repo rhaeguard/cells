@@ -1,4 +1,4 @@
-async function loadFakeCsvData() {
+function loadFakeCsvData() {
     return [
         ["id", "full_name", "email", "is_subscriber", "score"],
         ["1", "Ambur Wynrehame", "awynrehame0@yelp.com", "false", "4.064"],
