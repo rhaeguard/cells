@@ -119,8 +119,6 @@ const createCell = (id) => {
                 response = this.data
             }
 
-            // console.log(`[${this.id}] value ${this.computedValue} => ${response}`)
-
             this.computedValue = response;
             this.error = null;
             this.draw()
@@ -164,6 +162,7 @@ const createDataTable = (rowCount, colCount) => {
 }
 
 const ROOT_TABLE = document.getElementById("root_table");
+const VLINE = document.getElementById('vline');
 const DATA_TABLE = createDataTable(TOTAL_ROW_COUNT, TOTAL_COL_COUNT);
 let selectedCells = []
 let mouseDownState = {
@@ -343,7 +342,40 @@ function redraw() {
             if (c === 0 && r !== 0) {
                 cell.innerHTML = `${r}`
             } else if (r === 0) {
-                cell.innerHTML = generateNextColumnName(c) + `<div class="resizer"></div>`;
+                cell.innerHTML = generateNextColumnName(c)// + `<div class="resizer"></div>`;
+                const resizer = document.createElement("div")
+                resizer.className = "resizer"
+                cell.appendChild(resizer)
+
+                let startX, startWidth;
+
+                resizer.addEventListener('mousedown', (e) => {
+                    startX = e.pageX;
+                    startWidth = cell.offsetWidth;
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+
+                function onMouseMove(e) {
+                    VLINE.style.display = "block";
+                    VLINE.style.left = `${e.clientX}px`;
+                }
+
+                function onMouseUp(e) {
+                    const tableWidth = ROOT_TABLE.offsetWidth;
+
+                    const diff = e.pageX - startX
+                    const newWidth = startWidth + diff;
+                    
+                    ROOT_TABLE.style.width = `${tableWidth + diff}px`;
+                    cell.style.width = `${newWidth}px`;
+
+                    VLINE.style.display = "none";
+
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+
             } else {
                 cell.setAttribute("contenteditable", false);
                 registerEventListenersForCell(cell)
@@ -379,44 +411,4 @@ document.addEventListener("draw", function (event) {
     redraw()
 })
 
-// const multiarray = loadFakeCsvData()
-
-// const colCount = multiarray[0].length;
-// for (let c=0; c < colCount; c++) {
-//     const colName = generateNextColumnName(c+1);
-//     const columnData = DATA_TABLE[colName]
-
-//     for (let r=0; r < multiarray.length; r++) {
-//         columnData[r + 1].data = multiarray[r][c]
-//     }
-// }
-
 redraw()
-
-const resizers = document.querySelectorAll('.resizer');
-resizers.forEach(resizer => {
-    const th = resizer.parentElement;
-    let startX, startWidth;
-
-    resizer.addEventListener('mousedown', (e) => {
-        startX = e.pageX;
-        startWidth = th.offsetWidth;
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    });
-
-    function onMouseMove(e) {}
-
-    function onMouseUp(e) {
-        const tableWidth = ROOT_TABLE.offsetWidth;
-
-        const diff = e.pageX - startX
-        const newWidth = startWidth + diff;
-        
-        ROOT_TABLE.style.width = `${tableWidth + diff}px`;
-        th.style.width = `${newWidth}px`;
-
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-    }
-});

@@ -50,3 +50,14 @@ th {
     user-select: none;
     height: 100%;
 }
+
+#vline {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: black;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+}
