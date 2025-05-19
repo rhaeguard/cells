@@ -166,6 +166,13 @@ const createDataTable = (rowCount, colCount) => {
 const ROOT_TABLE = document.getElementById("root_table");
 const DATA_TABLE = createDataTable(TOTAL_ROW_COUNT, TOTAL_COL_COUNT);
 let selectedCells = []
+let mouseDownState = {
+    value: false,
+    selectedCells: {
+        start: null,
+        end: null
+    }
+};
 
 document.addEventListener("keydown", (event) => {
     if (selectedCells.length > 0) {
@@ -176,14 +183,12 @@ document.addEventListener("keydown", (event) => {
                     DATA_TABLE[colId][rowNum].style.isBold = !DATA_TABLE[colId][rowNum].style.isBold;
                 }
                 event.preventDefault()
-                document.dispatchEvent(DRAW_EVENT)
             } else if (event.key === 'i') {
                 for (let targetId of selectedCells) {
                     const [rowNum, colId] = getCellPositionFromId(targetId)
                     DATA_TABLE[colId][rowNum].style.isItalic = !DATA_TABLE[colId][rowNum].style.isItalic;
                 }
                 event.preventDefault()
-                document.dispatchEvent(DRAW_EVENT)
             }
         } else {
             if (event.key === "Enter") {
@@ -196,11 +201,51 @@ document.addEventListener("keydown", (event) => {
                     DATA_TABLE[col][row].computeAndPropagate()
                 }
                 event.preventDefault()
-                document.dispatchEvent(DRAW_EVENT)
             }
         }
     }
 })
+
+document.addEventListener('keydown', function (event) {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'o') {
+        event.preventDefault();
+
+        // Create and trigger an invisible file input
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.style.display = 'none';
+
+        input.onchange = function (e) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const contents = e.target.result;
+                    const lines = contents.split("\n");
+
+                    const multiarray = lines.slice(0, TOTAL_ROW_COUNT).map(line => line.split(",").slice(0, TOTAL_COL_COUNT))
+
+                    const colCount = multiarray[0].length;
+                    for (let c=0; c < colCount; c++) {
+                        const colName = generateNextColumnName(c+1);
+                        const columnData = DATA_TABLE[colName]
+
+                        for (let r=0; r < multiarray.length; r++) {
+                            columnData[r + 1].data = multiarray[r][c]
+                        }
+                    }
+
+                    document.dispatchEvent(DRAW_EVENT)
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        document.body.appendChild(input);
+        input.click();
+        document.body.removeChild(input);
+    }
+});
 
 function registerEventListenersForCell(cell) {
     cell.addEventListener("dblclick", (event) => {
@@ -217,7 +262,7 @@ function registerEventListenersForCell(cell) {
         DATA_TABLE[col][row].data = content === "" ? undefined : content;
     })
 
-    cell.addEventListener("click", (event) => {
+    cell.addEventListener("mousedown", (event) => {
         const id = event.target.id
         if (!selectedCells.includes(id)) {
             let [r, c] = getCellPositionFromId(id)
@@ -233,8 +278,52 @@ function registerEventListenersForCell(cell) {
                 selectedCells = [id];
             }
             DATA_TABLE[c][r].draw()
-            document.dispatchEvent(DRAW_EVENT)
         }
+        mouseDownState.value = true;
+        mouseDownState.selectedCells.start = id;
+        mouseDownState.selectedCells.end = id;
+    })
+
+    function selectDeselectCells(isSelected) {
+        let {start, end} = mouseDownState.selectedCells;
+        end = end == null ? start : end
+
+        let [sr, sc] = start.split("-").map(s => parseInt(s))
+        let [er, ec] = end.split("-").map(s => parseInt(s))
+
+        let [_sr, _er] = sr <= er ? [sr, er] : [er, sr]; 
+        let [_sc, _ec] = sc <= ec ? [sc, ec] : [ec, sc]; 
+
+        for (let c = _sc; c <= _ec; c++) {
+            const cc = generateNextColumnName(c)
+            const column = DATA_TABLE[cc]
+            for (let r = _sr; r <= _er; r++) {
+                column[r].style.isSelected = isSelected;
+                column[r].draw();
+                const id = `${r}-${c}`
+                if (isSelected == true) {
+                    selectedCells.push(id)
+                } else {
+                    selectedCells = selectedCells.filter(sc => sc != id)
+                }
+            }
+        }
+    }
+
+    cell.addEventListener("mouseup", (event) => {
+        mouseDownState.value = false;
+        mouseDownState.selectedCells.start = null;
+        mouseDownState.selectedCells.end = null;
+    })
+
+    cell.addEventListener("mouseover", (event) => {
+        if (mouseDownState.value == true) {
+            selectDeselectCells(false);
+            const id = event.target.id
+            mouseDownState.selectedCells.end = id;
+            selectDeselectCells(true);
+        }
+        
     })
 
 }
@@ -254,7 +343,7 @@ function redraw() {
             if (c === 0 && r !== 0) {
                 cell.innerHTML = `${r}`
             } else if (r === 0) {
-                cell.innerHTML = generateNextColumnName(c);
+                cell.innerHTML = generateNextColumnName(c) + `<div class="resizer"></div>`;
             } else {
                 cell.setAttribute("contenteditable", false);
                 registerEventListenersForCell(cell)
@@ -286,14 +375,9 @@ function redraw() {
     }
 }
 
-document.addEventListener("draw", async function (event) {
-    // await new Promise((resolve) => {
-    //     redraw()
-    //     resolve()
-    // })
+document.addEventListener("draw", function (event) {
+    redraw()
 })
-
-redraw()
 
 // const multiarray = loadFakeCsvData()
 
@@ -307,4 +391,32 @@ redraw()
 //     }
 // }
 
-// redraw()
+redraw()
+
+const resizers = document.querySelectorAll('.resizer');
+resizers.forEach(resizer => {
+    const th = resizer.parentElement;
+    let startX, startWidth;
+
+    resizer.addEventListener('mousedown', (e) => {
+        startX = e.pageX;
+        startWidth = th.offsetWidth;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e) {}
+
+    function onMouseUp(e) {
+        const tableWidth = ROOT_TABLE.offsetWidth;
+
+        const diff = e.pageX - startX
+        const newWidth = startWidth + diff;
+        
+        ROOT_TABLE.style.width = `${tableWidth + diff}px`;
+        th.style.width = `${newWidth}px`;
+
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+});
