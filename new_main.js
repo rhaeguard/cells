@@ -1,6 +1,3 @@
-let TOTAL_ROW_COUNT = 1000;
-let TOTAL_COL_COUNT = 26;
-
 const createCell = (id) => {
     return {
         id: id,
@@ -8,7 +5,6 @@ const createCell = (id) => {
         computedValue: undefined,
         error: undefined,
         containsCycle: false,
-        node: null,
         set: function(newData=null) {
             newData = newData ?? this.data
             this.data = newData
@@ -78,29 +74,28 @@ const createCell = (id) => {
             }
             return this.computedValue ?? this.data 
         },
-        draw: function() {
+        draw: function(node) {
             const v = this.value()
             if (v instanceof Error) {
-                this.node.innerHTML = v.message;
+                node.innerHTML = v.message;
             } else {
-                this.node.innerHTML = v ? v : ""
+                node.innerHTML = v ? v : ""
             }
 
-            this.node.style.backgroundColor = this.style.backgroundColor ?? "inherit";
-            this.node.style.textColor = this.style.textColor ?? "inherit";
-            this.node.style.textSize = this.style.textSize;
-            this.node.style.fontWeight = this.style.isBold ? "bold" : "normal";
-            this.node.style.fontStyle = this.style.isItalic ? "italic" : "normal"
+            node.style.backgroundColor = this.style.backgroundColor ?? "inherit";
+            node.style.textColor = this.style.textColor ?? "inherit";
+            node.style.textSize = this.style.textSize;
+            node.style.fontWeight = this.style.isBold ? "bold" : "normal";
+            node.style.fontStyle = this.style.isItalic ? "italic" : "normal"
 
             if (this.style.isSelected) {
-                this.node.style.backgroundColor = "lightblue";
+                node.style.backgroundColor = "lightblue";
             }
         },
         computeAndPropagate: function() {
             if (this.containsCycle) {
                 this.error = new Error("cycle detected")
                 this.computedValue = undefined;
-                this.draw()
                 return;
             }
 
@@ -111,7 +106,6 @@ const createCell = (id) => {
                 const [evalResponse, error] = eval(parsedExpression, DATA_TABLE); // TODO: handle errors
                 if (error) {
                     this.error = error;
-                    this.draw()
                     return;
                 }
                 response = evalResponse
@@ -121,7 +115,6 @@ const createCell = (id) => {
 
             this.computedValue = response;
             this.error = null;
-            this.draw()
 
             for (let subscriber of this.subscribers) {
                 const [row, col] = getCellPositionFromCoord(subscriber)
@@ -161,14 +154,23 @@ const createDataTable = (rowCount, colCount) => {
     return tableObj;
 }
 
+
+let TOTAL_ROW_COUNT = 100;
+let TOTAL_COL_COUNT = 26;
+
 const ROOT_TABLE = document.getElementById("root_table");
 const ROOT_THEAD = document.getElementById("thead")
 const ROOT_TBODY = document.getElementById("tbody")
 
 const VLINE = document.getElementById('vline');
 
-const DATA_TABLE = createDataTable(TOTAL_ROW_COUNT, TOTAL_COL_COUNT);
+let DATA_TABLE = createDataTable(TOTAL_ROW_COUNT, TOTAL_COL_COUNT);
 
+// state variables
+const innerHeight = window.innerHeight;
+const ROW_HEIGHT = 25;
+const ROW_COUNT = Math.floor(innerHeight / ROW_HEIGHT) - 1
+let STARTING_ROW = 0
 let selectedCells = []
 let mouseDownState = {
     value: false,
@@ -177,6 +179,13 @@ let mouseDownState = {
         end: null
     }
 };
+// state variables end
+
+function setEndOfContenteditable(elem) {
+    let sel = window.getSelection();
+    sel.selectAllChildren(elem);
+    sel.collapseToStart();
+}
 
 document.addEventListener("keydown", (event) => {
     if (selectedCells.length > 0) {
@@ -184,25 +193,32 @@ document.addEventListener("keydown", (event) => {
             if (event.key === 'b') {
                 for (let targetId of selectedCells) {
                     const [rowNum, colId] = getCellPositionFromId(targetId)
+                    const targetEl = document.getElementById(targetId) 
                     DATA_TABLE[colId][rowNum].style.isBold = !DATA_TABLE[colId][rowNum].style.isBold;
+                    DATA_TABLE[colId][rowNum].draw(targetEl)
                 }
                 event.preventDefault()
             } else if (event.key === 'i') {
                 for (let targetId of selectedCells) {
                     const [rowNum, colId] = getCellPositionFromId(targetId)
+                    const targetEl = document.getElementById(targetId) 
                     DATA_TABLE[colId][rowNum].style.isItalic = !DATA_TABLE[colId][rowNum].style.isItalic;
+                    DATA_TABLE[colId][rowNum].draw(targetEl)
                 }
                 event.preventDefault()
             }
         } else {
             if (event.key === "Enter") {
                 for (let targetId of selectedCells) {
-                    document.getElementById(targetId).setAttribute("contenteditable", false);
-                    let content = document.getElementById(targetId).innerText.trim()
+                    const targetEl = document.getElementById(targetId) 
+                    setEndOfContenteditable(targetEl)
+                    targetEl.contentEditable = false;
+                    let content = targetEl.innerText.trim()
                     content = content === "" ? undefined : content;
-                    const [row, col] = getCellPositionFromId(targetId)
-                    DATA_TABLE[col][row].set(content);
-                    DATA_TABLE[col][row].computeAndPropagate()
+                    const [rowNum, colId] = getCellPositionFromId(targetId)
+                    DATA_TABLE[colId][rowNum].set(content);
+                    DATA_TABLE[colId][rowNum].computeAndPropagate()
+                    DATA_TABLE[colId][rowNum].draw(targetEl)
                 }
                 event.preventDefault()
             }
@@ -210,54 +226,12 @@ document.addEventListener("keydown", (event) => {
     }
 })
 
-function loadData(multiarray) {
-    const colCount = multiarray[0].length;
-    for (let c=0; c < colCount; c++) {
-        const colName = generateNextColumnName(c+1);
-        const columnData = DATA_TABLE[colName]
-
-        for (let r=0; r < multiarray.length; r++) {
-            columnData[r + 1].data = multiarray[r][c]
-        }
-    }
-}
-
-document.addEventListener('keydown', function (event) {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'o') {
-        event.preventDefault();
-
-        // Create and trigger an invisible file input
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.style.display = 'none';
-
-        input.onchange = function (e) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const contents = e.target.result;
-                    const lines = contents.split("\n");
-                    const multiarray = lines.slice(0, TOTAL_ROW_COUNT).map(line => line.split(",").slice(0, TOTAL_COL_COUNT))
-                    loadData(multiarray)
-                    document.dispatchEvent(DRAW_EVENT)
-                };
-                reader.readAsText(file);
-            }
-        };
-
-        document.body.appendChild(input);
-        input.click();
-        document.body.removeChild(input);
-    }
-});
-
 function registerEventListenersForCell(cell) {
     cell.addEventListener("dblclick", (event) => {
         const [row, col] = getCellPositionFromId(event.target.id)
         const data = DATA_TABLE[col][row].data
         event.target.innerText = data ? data : ""
-        event.target.setAttribute("contenteditable", true);
+        event.target.contentEditable = true;
     });
 
     cell.addEventListener("input", (event) => {
@@ -278,11 +252,14 @@ function registerEventListenersForCell(cell) {
                 for (let otherSelected of selectedCells) {
                     const [rr, cc] = getCellPositionFromId(otherSelected)
                     DATA_TABLE[cc][rr].style.isSelected = false;
-                    DATA_TABLE[cc][rr].draw()
+                    const td = document.getElementById(otherSelected)
+                    if (td) {
+                        DATA_TABLE[cc][rr].draw(td)
+                    }
                 }
                 selectedCells = [id];
             }
-            DATA_TABLE[c][r].draw()
+            DATA_TABLE[c][r].draw(event.target)
         }
         mouseDownState.value = true;
         mouseDownState.selectedCells.start = id;
@@ -303,9 +280,12 @@ function registerEventListenersForCell(cell) {
             const cc = generateNextColumnName(c)
             const column = DATA_TABLE[cc]
             for (let r = _sr; r <= _er; r++) {
-                column[r].style.isSelected = isSelected;
-                column[r].draw();
                 const id = `${r}-${c}`
+                column[r].style.isSelected = isSelected;
+                const td = document.getElementById(id)
+                if (td) {
+                    column[r].draw(td)
+                }
                 if (isSelected == true) {
                     selectedCells.push(id)
                 } else {
@@ -333,97 +313,130 @@ function registerEventListenersForCell(cell) {
 
 }
 
-function redraw() {
-    ROOT_TABLE.innerHTML = ""
-    for (let r = 0; r <= TOTAL_ROW_COUNT; r++) {
-        const tr = document.createElement("tr")
-        tr.className = "row"
-        tr.id = `r${r}`
-        for (let c = 0; c <= TOTAL_COL_COUNT; c++) {
-            const cellType = (r === 0 || c === 0) ? "th" : "td";
-            const cell = document.createElement(cellType);
-            cell.className = "cell"
-            cell.id = `${r}-${c}`
-            tr.appendChild(cell);
-            if (c === 0 && r !== 0) {
-                cell.innerHTML = `${r}`
-            } else if (r === 0) {
-                cell.innerHTML = generateNextColumnName(c)
-                const resizer = document.createElement("div")
-                resizer.className = "resizer"
-                cell.appendChild(resizer)
+function drawBlankTable() {
+    const row = document.createElement("tr")
+    const cols = []
+    for(let c=0; c <= TOTAL_COL_COUNT; c++) {
+        const th = document.createElement("th")
+        const colName = generateNextColumnName(c)
+        const resizer = document.createElement("div")
+        resizer.className = "resizer"
+        th.innerText = colName
+        th.style.minWidth = `100px`
+        th.style.overflow = "hidden"
+        th.appendChild(resizer)
+        cols.push(th)
 
-                let startX, startWidth;
+        let startX, startWidth;
 
-                resizer.addEventListener('mousedown', (e) => {
-                    startX = e.pageX;
-                    startWidth = cell.offsetWidth;
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                });
+        resizer.addEventListener('mousedown', (e) => {
+            startX = e.pageX;
+            startWidth = th.offsetWidth;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
 
-                function onMouseMove(e) {
-                    VLINE.style.display = "block";
-                    VLINE.style.left = `${e.clientX}px`;
-                }
+        function onMouseMove(e) {
+            VLINE.style.display = "block";
+            VLINE.style.left = `${e.clientX}px`;
+        }
 
-                function onMouseUp(e) {
-                    const tableWidth = ROOT_TABLE.offsetWidth;
+        function onMouseUp(e) {
+            const tableWidth = ROOT_TABLE.offsetWidth;
 
-                    const diff = e.pageX - startX
-                    const newWidth = startWidth + diff;
-                    
-                    ROOT_TABLE.style.width = `${tableWidth + diff}px`;
-                    cell.style.width = `${newWidth}px`;
+            const diff = e.pageX - startX
+            const newWidth = startWidth + diff;
+            
+            ROOT_TABLE.style.width = `${tableWidth + diff}px`;
+            th.style.width = `${newWidth}px`;
+            th.style.maxWidth = `${newWidth}px`;
 
-                    VLINE.style.display = "none";
+            VLINE.style.display = "none";
 
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                }
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+    }
+    row.append(...cols)
+    ROOT_THEAD.appendChild(row)
 
+    const rows = []
+    for(let r=1; r < ROW_COUNT; r++) {
+        const row = document.createElement("tr")
+        row.style.height = `${ROW_HEIGHT}px`
+        const cols = []
+        for(let c=0; c <= TOTAL_COL_COUNT; c++) {
+            if (c === 0) {
+                const th = document.createElement("th")
+                cols.push(th)
             } else {
-                cell.setAttribute("contenteditable", false);
-                registerEventListenersForCell(cell)
-                const datum = DATA_TABLE[generateNextColumnName(c)][r];
-                
-                const st = datum.style;
-                
-                cell.style.backgroundColor = st.backgroundColor ?? "inherit";
-                cell.style.textColor = st.textColor ?? "inherit";
-                cell.style.textSize = st.textSize;
-                cell.style.fontWeight = st.isBold ? "bold" : "normal";
-                cell.style.fontStyle = st.isItalic ? "italic" : "normal"
-
-                if (st.isSelected) {
-                    cell.style.backgroundColor = "lightblue";
-                }
-                
-                const v = datum.value()
-                if (v instanceof Error) {
-                    cell.innerHTML = v.message;
-                } else {
-                    cell.innerHTML = v ? v : ""
-                }
-
-                DATA_TABLE[generateNextColumnName(c)][r].node = cell;
+                const td = document.createElement("td")
+                registerEventListenersForCell(td)
+                cols.push(td)
             }
         }
-        ROOT_TABLE.appendChild(tr);
+        row.append(...cols)
+        rows.push(row)
+    }
+    ROOT_TBODY.append(...rows)
+}
+
+
+
+function rerenderRows(startingRow = 0) {
+    const rows = ROOT_TBODY.querySelectorAll("tr")
+    for(let r=1; r < ROW_COUNT; r++) {
+        const row = rows.item(r-1)
+        row.className = "row"
+        row.id = `r${r}`
+        const cols = row.querySelectorAll("td,th")
+        for(let c=0; c <= TOTAL_COL_COUNT; c++) {
+            const td = cols.item(c)
+            const colName = generateNextColumnName(c)
+            if (c === 0) {
+                td.innerText = `${r+startingRow}`
+            } else {
+                td.contentEditable = false;
+                const v = DATA_TABLE[colName][r+startingRow]
+                v.draw(td)
+                td.id = `${r}-${c}`
+            }
+        }
     }
 }
 
-document.addEventListener("draw", function (event) {
-    redraw()
-})
+function loadData(multiarray) {
+    const colCount = multiarray[0].length;
+    for (let c=0; c < colCount; c++) {
+        const colName = generateNextColumnName(c+1);
+        const columnData = DATA_TABLE[colName]
+
+        for (let r=0; r < multiarray.length; r++) {
+            columnData[r + 1].data = multiarray[r][c]
+        }
+    }
+}
 
 // fetch("http://127.0.0.1:5500/EDM.csv")
 //     .then(file => file.text())
 //     .then(contents => {
-//         const lines = contents.split("\n");
+//         let lines = contents.split("\n");
+//         lines = lines.slice(0, 15000)
+//         TOTAL_ROW_COUNT = lines.length;
+//         TOTAL_COL_COUNT = lines[0].split(",").length
+//         DATA_TABLE = createDataTable(TOTAL_ROW_COUNT, TOTAL_COL_COUNT);
 //         const multiarray = lines.slice(0, TOTAL_ROW_COUNT).map(line => line.split(",").slice(0, TOTAL_COL_COUNT))
 //         loadData(multiarray)
-//         document.dispatchEvent(DRAW_EVENT)
+//         drawBlankTable()
+//         rerenderRows(0)
 //     })
 
-redraw()
+document.addEventListener("wheel", (ev) => {
+    STARTING_ROW += Math.floor(ev.deltaY / ROW_HEIGHT)
+    STARTING_ROW = STARTING_ROW < 0 ? 0 : STARTING_ROW
+    STARTING_ROW = STARTING_ROW + ROW_COUNT >= TOTAL_ROW_COUNT ? TOTAL_ROW_COUNT - ROW_COUNT : STARTING_ROW
+    rerenderRows(STARTING_ROW)
+})
+
+drawBlankTable()
+rerenderRows(0)
