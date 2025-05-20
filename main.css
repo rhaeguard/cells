@@ -2,25 +2,28 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: scroll;
+    background-color: lightgrey;
 }
 
 table {
-    /* table-layout: fixed; */
-    width: calc(100px * 27); 
-    /* 26 for 26 letters */
-    /* width: 100%; */
+    /* width: calc(100px * 27);  */
+    border-bottom: 1px solid black;
 }
 
 table, tr, td, th {
     border: 1px solid lightgray;
     box-sizing: border-box;
     border-collapse: collapse;
+    background-color: white;
 }
 
 td, th {
-    min-width: 5vw;
+    max-width: 100px;
     min-height: 1vh;
     position: relative;
+    overflow: hidden;
+
+    white-space: nowrap;
 }
 
 th {

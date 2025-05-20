@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+
+        body {
+    margin: 0;
+    padding: 0;
+    overflow-x: scroll;
+}
+
+table {
+    width: calc(100px * 27); 
+}
+
+table, tr, td, th {
+    border: 1px solid lightgray;
+    box-sizing: border-box;
+    border-collapse: collapse;
+}
+
+td, th {
+    min-width: 5vw;
+    min-height: 1vh;
+    position: relative;
+}
+
+th {
+    background-color: lightgray;
+    border-right-color: black;
+    border-bottom-color: black;
+}
+
+.cell-selected {
+    border-color: blue;
+    border-width: 3px;
+}
+
+.noselect {
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE10+/Edge */
+}
+
+.resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 5px;
+    cursor: col-resize;
+    user-select: none;
+    height: 100%;
+}
+
+#vline {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: black;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+}
+
+    </style>
+</head>
+<body>
+
+<table id="table">
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+</table>
+    
+<script>
+    const createDataTable = (rowCount, colCount) => {
+        const tableObj = {}
+        
+        for (let c = 0; c < colCount; c++) {
+            tableObj[c] = new Array(rowCount)
+                .fill(null)   
+                .map((_, row) => {
+                    if (c == 0) return `${row}`
+                    return `Hello ${row}${c}`
+                })
+        }
+        
+        return tableObj;
+    }
+
+    const ROOT_TABLE = document.getElementById("table")
+    const ROOT_THEAD = document.getElementById("thead")
+    const ROOT_TBODY = document.getElementById("tbody")
+
+    const TOTAL_ROWS = 1000
+    const TOTAL_COLS = 27
+
+    const DATA_TABLE = createDataTable(TOTAL_ROWS, TOTAL_COLS)
+
+    const innerHeight = window.innerHeight;
+    const rowHeight = 25;
+    const rowCount = Math.floor(innerHeight / rowHeight) -1 
+
+    function renderRows(startingRow = 0) {
+        const rows = []
+        for(let r=startingRow; r < startingRow + rowCount; r++) {
+            const row = document.createElement("tr")
+            row.style.height = `${rowHeight}px`
+            const cols = []
+            for(let c=0; c < TOTAL_COLS; c++) {
+                const td = document.createElement("td")
+                const v = DATA_TABLE[c][r]
+                td.innerText = v == null ? "" : v
+                cols.push(td)
+            }
+            row.append(...cols)
+            rows.push(row)
+        }
+        ROOT_TBODY.append(...rows)
+    }
+
+    function rerenderRows(startingRow = 0) {
+        const rows = ROOT_TBODY.querySelectorAll("tr")
+        for(let r=0; r < rowCount; r++) {
+            const row = rows.item(r)
+            const cols = row.querySelectorAll("td")
+            for(let c=0; c < TOTAL_COLS; c++) {
+                const td = cols.item(c)
+                const v = DATA_TABLE[c][r+startingRow]
+                td.innerText = v == null ? "" : v
+            }
+        }
+    }
+
+    let startingRow = 0
+    renderRows(startingRow)
+
+    document.addEventListener("wheel", (ev) => {
+        console.log("fired", ev.deltaY)
+        startingRow += Math.floor(ev.deltaY / 25)
+        startingRow = startingRow < 0 ? 0 : startingRow
+        startingRow = startingRow > TOTAL_ROWS ? TOTAL_ROWS - 1 : startingRow
+        rerenderRows(startingRow)
+    })
+
+</script>
+
+</body>
+</html>
