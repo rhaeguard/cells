@@ -96,6 +96,7 @@ const BUILT_IN_FUNCTIONS_MAP = {
             return [null, error]
         }
         for (let arr of array) {
+            // there's an implicit interpretation as a number
             const localMin = arr.reduce((min, n) => Math.min(min, n), Infinity)
             globalMin = Math.min(globalMin, localMin)
         }
@@ -109,6 +110,7 @@ const BUILT_IN_FUNCTIONS_MAP = {
             return [null, error]
         }
         for (let arr of array) {
+            // there's an implicit interpretation as a number
             const localMax = arr.reduce((max, n) => Math.max(max, n), -Infinity)
             globalMax = Math.max(globalMax, localMax)
         }
@@ -120,7 +122,7 @@ const BUILT_IN_FUNCTIONS_MAP = {
         const result = []
         let currentCol = sc
         do {
-            result.push(context[currentCol].slice(sr, er+1).map(cell => cell.computedValue))
+            result.push(context[currentCol].slice(sr, er+1).map(cell => cell.value()))
             if (currentCol === ec) {
                 break
             }

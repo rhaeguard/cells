@@ -49,3 +49,32 @@ https://github.com/user-attachments/assets/d96d71a8-bd03-4001-a5c4-994fce659f3c
 ### User Interface and Experience
  - [ ] minimal user interface
     - [ ] double shift to open a menu to do things like load, save, switch sheets etc.
+
+## built in functions
+
+```sh
+# arithmetic
+=(+ 10 A1) # add
+=(- 10 A2) # sub
+=(* 10 A2) # mult
+=(/ 10 A2) # div
+=(^ 10 A2) # pow
+# comparison
+=(= 10 A2) # equality check
+=(> 10 A2) # greater than
+=(>= 10 A2) # greater than equal
+=(< 10 A2) # less than
+=(<= 10 A2) # less than equal
+=(<> 10 A2) # not equal
+# aggregation
+=(sum A1:B10) # sums the range
+=(mean A1:B10) # finds mean value in the range
+=(mode A1:B10) # finds mode value in the range (not implemented yet)
+=(count A1:B10) # finds the number of elements in the range
+=(min A1:B10) # finds the minimum value in the range
+=(max A1:B10) # finds the maximum value in the range
+# conditionals
+=(if condition resultTrue resultFalse) # conditional value
+=(if (> A1 10) 100 200) # if example
+=(if (> A1 10) "hi" "bye") # if example
+```
