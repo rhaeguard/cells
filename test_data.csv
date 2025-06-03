@@ -1,0 +1,101 @@
+HeroID,HeroName,RealName,Power,Affiliation,OriginCity,DebutYear,Strength,Intelligence,IsAlien
+1,Nui-Jnip,Lotduu Vzbgsw,Invisibility,Avengers,New York,2005,19,38,False
+2,Ose-Euib,Gutzts Vrdoom,Telepathy,Solo,Atlantis,1966,50,56,False
+3,Cqz-Riqb,Mkbzaq Crzbyv,Water Control,Teen Titans,Asgard,1958,97,35,False
+4,Bho-Mnde,Syrdnc Akjncu,Flight,Solo,Central City,2017,34,93,True
+5,Zyb-Izoe,Hgwjon Memwyb,Water Control,Avengers,Asgard,1985,41,1,False
+6,Dvt-Weml,Cpbsgl Dinmpd,Fire Control,X-Men,New York,1989,15,68,False
+7,Ewz-Siiw,Sinrst Lvdwqb,Speed,Justice League,Atlantis,1950,60,92,True
+8,Nqe-Ucam,Ugtncc Zmrsng,Flight,Justice League,New York,1992,1,83,False
+9,Qca-Epsr,Qdswry Xpoxcb,Telepathy,Justice League,Atlantis,1954,29,55,False
+10,Bwp-Breh,Oswilx Glqisk,Time Travel,Avengers,Asgard,1966,54,45,True
+11,Tcf-Xqav,Qmncev Susnhu,Telepathy,Teen Titans,New York,1967,81,4,False
+12,Usw-Przo,Sukaqp Qzknqk,Speed,Solo,Gotham,2010,86,23,True
+13,Nyk-Himp,Nvxtcv Lwdskn,Time Travel,Guardians,Asgard,1950,4,3,True
+14,Bkz-Txoz,Fvskso Yvscjb,Shape Shifting,X-Men,New York,1958,83,99,True
+15,Xtj-Kliu,Cbhdpa Ukayti,Speed,Justice League,New York,2011,59,39,False
+16,Dgb-Towx,Vrfgfq Lreuwy,Shape Shifting,Solo,Atlantis,2005,78,13,False
+17,Gmb-Sufd,Fraryj Jblopw,Water Control,X-Men,Asgard,1999,86,67,True
+18,Vrv-Rdpt,Uuexmj Pmfeec,Flight,Avengers,Metropolis,2018,9,82,True
+19,Fhm-Ftkl,Xbgfhc Gfknoq,Shape Shifting,Avengers,Asgard,1993,23,86,False
+20,Ltz-Xlds,Grbudg Eeufnf,Telepathy,Justice League,Central City,1944,37,47,False
+21,Elj-Sfdw,Ndzrps Wnyelj,Water Control,X-Men,Central City,1953,59,64,False
+22,Tsk-Qreo,Xxmlni Wbntyu,Shape Shifting,X-Men,Atlantis,1964,63,57,True
+23,Qqn-Hwll,Cwzqst Lvvpfi,Fire Control,Teen Titans,Central City,2013,25,23,False
+24,Uqg-Aeat,Xkmjht Oqcutx,Super Strength,Avengers,New York,1986,94,9,True
+25,Efk-Bpvz,Ezzrwd Zqctxv,Shape Shifting,Teen Titans,Asgard,1997,41,83,False
+26,Ful-Elwl,Gtqzeq Dksbav,Speed,Solo,Atlantis,1967,92,70,False
+27,Gvn-Czly,Kxvlyd Otsaoi,Telepathy,Solo,Metropolis,2022,3,40,True
+28,Ngx-Qgtc,Heybxz Yxprlg,Healing,Solo,Central City,1956,94,19,False
+29,Dsj-Dlpq,Reuhjs Ncuceg,Fire Control,Guardians,Metropolis,1962,71,25,True
+30,Say-Cfsc,Sjufcs Imzgwy,Shape Shifting,X-Men,Asgard,1973,83,70,True
+31,Abr-Lwtz,Yjedci Fxlmqh,Shape Shifting,Teen Titans,Atlantis,1940,40,30,False
+32,Khn-Anpg,Movrji Clbyvc,Super Strength,Justice League,Central City,1985,32,62,False
+33,Sdx-Nywt,Zoxndq Otgxpk,Healing,Justice League,Metropolis,2010,89,2,True
+34,Cuz-Kiio,Lffysl Pemuua,Water Control,Guardians,Gotham,1987,89,33,False
+35,Sdf-Bfwe,Ysshee Mbidcz,Fire Control,Solo,Atlantis,2013,56,52,True
+36,Agx-Isyg,Djcvgt Eojwqn,Speed,Guardians,Atlantis,2014,99,86,False
+37,Ehs-Wlen,Cjzduf Sulwoz,Healing,Avengers,Central City,1942,47,61,False
+38,Hyg-Dtds,Hjioos Jldggl,Water Control,Justice League,New York,2022,68,38,False
+39,Qds-Fplh,Zrjerh Xolcqh,Healing,Avengers,Atlantis,1976,12,19,False
+40,Pbq-Sgwy,Jwffwl Slouzg,Water Control,X-Men,Central City,1956,23,5,False
+41,Ldh-Hlyh,Wfiowh Mvmfkd,Invisibility,Guardians,Gotham,1999,41,8,True
+42,Kmp-Dqxt,Dvbbvo Ymuaxe,Speed,Justice League,Asgard,1982,74,60,False
+43,Ajq-Nnez,Xxlgle Vtogsi,Invisibility,Guardians,Central City,1949,64,58,False
+44,Tcs-Ogin,Dbkvzd Gllskf,Flight,X-Men,Gotham,1957,54,34,True
+45,Dug-Rbjt,Tuxevj Uxrjof,Time Travel,Guardians,Central City,1996,55,3,False
+46,Nlt-Zjjt,Ofedka Ciurxz,Telepathy,Avengers,New York,1950,79,76,False
+47,Ppl-Qsvu,Vcfukr Cwajil,Fire Control,Guardians,Gotham,2023,58,25,True
+48,Kmv-Ckvk,Bjiuml Wodrjj,Fire Control,Justice League,Gotham,1957,34,20,False
+49,Kpy-Pgjx,Wtafdp Wpweib,Flight,Justice League,Atlantis,1990,63,17,True
+50,Evk-Hscw,Zchisd Dqwlnx,Time Travel,Avengers,Gotham,1997,1,81,True
+51,Rlh-Uzrp,Tsptwg Xyxdin,Speed,Solo,Central City,2001,62,47,True
+52,Nmv-Ldnt,Mzgjdc Fngzqp,Flight,Avengers,Central City,2016,14,23,True
+53,Rbn-Qozy,Nbrcie Hokiql,Time Travel,Teen Titans,Metropolis,1952,8,14,False
+54,Smt-Hwbl,Mamasr Mrierd,Telepathy,Solo,Central City,1949,39,62,False
+55,Scv-Swnu,Czrwkf Pywzqk,Speed,Justice League,Asgard,2013,68,22,False
+56,Jid-Qeon,Ifqtrx Rkuvtq,Water Control,Avengers,Gotham,2001,59,19,False
+57,Egl-Ggzv,Xdqbqq Odddrr,Healing,Teen Titans,Atlantis,1941,31,52,True
+58,Ndk-Tljz,Gaetdh Qrngkr,Super Strength,Guardians,Atlantis,1984,20,70,True
+59,Vrp-Owob,Pinlce Gshwqj,Time Travel,Solo,Central City,1945,64,20,True
+60,Eyk-Hbzj,Amvpzr Nunxib,Super Strength,Teen Titans,Asgard,1942,97,28,True
+61,Chh-Jdng,Ucgpri Xjcbmi,Speed,Avengers,Metropolis,2016,8,83,False
+62,Ixn-Ccby,Bvoujj Hybmaq,Healing,Justice League,Central City,2016,49,78,False
+63,Txg-Gygv,Lhmcev Qshdhv,Speed,X-Men,Gotham,1940,88,74,False
+64,Uec-Vgvx,Ndrewe Kqpinm,Fire Control,Guardians,New York,1983,82,60,True
+65,Juc-Imxq,Mfblse Uoyukp,Fire Control,Justice League,New York,2003,14,33,True
+66,Zjy-Kwkw,Kmesbo Htkdsd,Healing,Guardians,Metropolis,2020,46,83,False
+67,Vcy-Whsc,Rzdrfx Smuavv,Flight,Guardians,Metropolis,1995,29,78,True
+68,Ncy-Bynj,Lwjhrm Wqtcmi,Invisibility,Justice League,New York,1957,57,59,False
+69,Xop-Rggv,Dgkcje Seuhfo,Flight,Teen Titans,New York,1964,31,37,True
+70,Gdz-Hrnw,Cbgwep Guflmh,Super Strength,Avengers,New York,1993,83,43,False
+71,Exj-Glwm,Mzvrfs Uvqcsm,Flight,X-Men,Metropolis,1970,78,50,False
+72,Dgr-Htbn,Oaqpnt Cetuoh,Shape Shifting,Justice League,Gotham,1978,20,60,True
+73,Ybv-Chhj,Tfpebb Vvvelf,Healing,Teen Titans,Atlantis,2009,24,62,True
+74,Ery-Jjwn,Qsnepu Xfcdgk,Water Control,X-Men,Asgard,1991,72,20,True
+75,Qot-Yutj,Exptwo Yhdcby,Flight,Teen Titans,Asgard,1990,21,77,True
+76,Gfu-Geif,Vbmbjz Uqzvei,Shape Shifting,Guardians,Central City,1976,15,82,True
+77,Avp-Xwnp,Tfnxsf Gubfvs,Time Travel,Solo,Metropolis,1977,66,39,False
+78,Xwk-Pijf,Vscirr Foupag,Super Strength,Teen Titans,New York,1946,90,46,False
+79,Fse-Kkvt,Siqrfs Gpfvro,Telepathy,Justice League,Gotham,2006,28,77,False
+80,Sbx-Slog,Putubn Fwcqxn,Shape Shifting,Guardians,Metropolis,2014,70,72,True
+81,Esd-Mita,Ksweca Ksstpf,Speed,Justice League,Metropolis,2015,41,21,True
+82,Vio-Jwuy,Bebpbu Xbkcus,Shape Shifting,X-Men,Atlantis,1965,55,89,False
+83,Ver-Fiud,Pgbjkg Qfudxk,Super Strength,X-Men,Central City,1997,73,62,False
+84,Kva-Eqyv,Bntzdy Szhwem,Fire Control,Justice League,Central City,1955,7,76,False
+85,Tho-Qprf,Mndjdp Sxymku,Invisibility,Solo,Asgard,1955,78,78,True
+86,Iek-Jmrp,Nilmmj Jwingu,Telepathy,Solo,Gotham,1952,9,84,False
+87,Cpx-Dhbp,Ztdvmv Svoxix,Water Control,X-Men,Central City,1986,46,9,False
+88,Jzv-Csdg,Bksrci Ebazcz,Fire Control,Justice League,Gotham,1960,11,81,True
+89,Rqt-Uqyv,Nuihbu Zoebrx,Time Travel,Justice League,Asgard,1949,89,56,False
+90,Vnk-Avkf,Nqpfjg Kzzzir,Invisibility,Teen Titans,Central City,1992,71,45,False
+91,Fux-Vrtj,Bmwewb Hqwvcw,Healing,Guardians,Atlantis,2010,5,79,True
+92,Srz-Hyfk,Obkzdq Vekbhj,Invisibility,Avengers,Metropolis,1977,2,96,True
+93,Oje-Oaxe,Ehlpzw Nvvedv,Time Travel,X-Men,Metropolis,1999,82,88,True
+94,Xvo-Tlln,Xkrgjl Axdwga,Telepathy,Solo,Central City,2008,99,14,False
+95,Xht-Jpaa,Hvpmiy Mwucxi,Invisibility,X-Men,Asgard,1964,65,60,False
+96,Iha-Tmrh,Pcmtwe Iccvqr,Super Strength,X-Men,New York,2011,7,1,True
+97,Rbc-Wxer,Vavczf Xfiofz,Speed,Teen Titans,New York,1984,95,1,True
+98,Cae-Tztb,Xwqtye Jlodxe,Telepathy,Avengers,Central City,1999,14,84,False
+99,Xvn-Voer,Lljpoa Ocpeec,Healing,Solo,Gotham,1978,56,99,False
+100,Cce-Zkiv,Dtfhxw Ztzhgs,Water Control,Justice League,New York,1947,3,55,False

@@ -2,7 +2,7 @@
 
 a spreadsheet app with lisp-like formulas
 
-[https://github.com/user-attachments/assets/91fb52ce-916d-4057-9873-f488c9d88f87](https://github.com/user-attachments/assets/4f7ea982-1d44-4bce-9497-b48c75836adc)
+https://github.com/user-attachments/assets/d96d71a8-bd03-4001-a5c4-994fce659f3c
 
 ## todo
 
@@ -32,18 +32,18 @@ a spreadsheet app with lisp-like formulas
 - [ ] general functionalities
     - [ ] copy + paste
     - [ ] undo + redo
-    - [ ] select a range using mouse
+    - [x] select a range using mouse
     - [x] select cells individually using ctrl
     - [ ] select cells range with shift
 
 ### Advanced Features
 
 - [x] circular dependency/cycle detection
-- [ ] helpful error messages
+- [x] helpful error messages
 - [ ] charts
 - [ ] multiple sheets
 - [ ] persist and load
-- [ ] load from CSV/TSV, etc.
+- [x] load from CSV/TSV, etc.
 - [ ] load from JSON
 
 ### User Interface and Experience
